@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class CustomUserManager(BaseUserManager):
     use_in_migrations = True
@@ -35,3 +37,18 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+    
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    timezone = models.CharField(max_length=50, default='UTC')
+    language = models.CharField(max_length=10, default='en')
+    onboarding_completed = models.BooleanField(default=False)
+    exploration_rate = models.FloatField(default=0.15)
+    digest_enabled = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
