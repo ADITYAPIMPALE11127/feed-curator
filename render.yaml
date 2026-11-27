@@ -20,10 +20,19 @@ services:
       - key: WEB_CONCURRENCY
         value: 4
       - key: LLM_API_KEY
-        sync: false # We will type this in manually on Render
+        sync: false # You will type this manually on Render
       - key: ALLOWED_HOSTS
         value: ".onrender.com"
       - key: ALLOWED_ORIGINS
         value: "https://feed-curator-frontend.onrender.com"
       - key: PYTHON_VERSION
         value: "3.12.0"
+
+  - type: web
+    name: feed-curator-frontend
+    runtime: static
+    buildCommand: "cd frontend && npm install && npm run build"
+    staticPublishPath: "./frontend/dist"
+    envVars:
+      - key: VITE_API_URL
+        value: "https://feed-curator-api.onrender.com"
