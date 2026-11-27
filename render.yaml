@@ -1,0 +1,29 @@
+databases:
+  - name: feed-curator-db
+    databaseName: feedcurator
+    user: feedcurator
+
+services:
+  - type: web
+    name: feed-curator-api
+    runtime: python
+    plan: free
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: feed-curator-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: LLM_API_KEY
+        sync: false # We will type this in manually on Render
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: ALLOWED_ORIGINS
+        value: "https://feed-curator-frontend.onrender.com"
+      - key: PYTHON_VERSION
+        value: "3.12.0"
