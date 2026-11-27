@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from ingestion.fetchers import fetch_all_active_sources
 from catalog.models import Item, Category
 from ai.llm_client import classify_item
-
+from ai.embeddings import generate_embeddings_for_new_items, cluster_items
 class Command(BaseCommand):
     help = 'Fetch, normalize, and dedupe items from all active sources'
 
@@ -38,3 +38,13 @@ class Command(BaseCommand):
             classified_count += 1
 
         self.stdout.write(self.style.SUCCESS(f"Successfully classified {classified_count} items."))
+        
+        # Step 3: Generate Embeddings
+        self.stdout.write("Generating embeddings...")
+        embedded_count = generate_embeddings_for_new_items()
+        self.stdout.write(self.style.SUCCESS(f"Generated embeddings for {embedded_count} items."))
+
+        # Step 4: Cluster similar items
+        self.stdout.write("Clustering similar items...")
+        clustered_count = cluster_items()
+        self.stdout.write(self.style.SUCCESS(f"Updated cluster IDs for {clustered_count} items."))
