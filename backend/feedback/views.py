@@ -5,7 +5,7 @@ from rest_framework import status
 from catalog.models import Item
 from .models import Interaction, UserCategoryWeight
 from django.shortcuts import get_object_or_404
-
+from ai.personalization import update_taste_vector
 class FeedbackView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -33,5 +33,8 @@ class FeedbackView(APIView):
                 weight_obj.weight = max(0.05, weight_obj.weight - 0.2)
                 
             weight_obj.save()
+                    # Recalculate the taste vector after every like/dislike
+        if action in ['like', 'dislike']:
+            update_taste_vector(request.user)
 
         return Response({"status": "success", "action": action})
